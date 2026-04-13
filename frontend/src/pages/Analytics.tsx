@@ -72,15 +72,15 @@ export default function Analytics() {
         </div>
 
         <div className="grid grid-cols-2 gap-6">
-          <div className="bg-surface-container-high rounded-3xl p-6 flex flex-col gap-6 chart-card">
+          <div className="bg-surface-container-high rounded-3xl p-6 flex flex-col gap-6">
             <h3 className="text-lg font-headline font-bold text-on-surface">Income vs Expenses</h3>
             {loading ? (
               <div className="h-64 flex items-center justify-center text-on-surface-variant">Loading...</div>
             ) : data.length === 0 ? (
               <div className="h-64 flex items-center justify-center text-on-surface-variant">No data available</div>
             ) : (
-              <div className="chart-container" style={{ minWidth: 0, width: '100%', height: '256px' }}>
-                <ResponsiveContainer width="100%" height={256}>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={data}>
                     <defs>
                       <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
@@ -107,15 +107,15 @@ export default function Analytics() {
             )}
           </div>
 
-          <div className="bg-surface-container-high rounded-3xl p-6 flex flex-col gap-6 chart-card">
+          <div className="bg-surface-container-high rounded-3xl p-6 flex flex-col gap-6">
             <h3 className="text-lg font-headline font-bold text-on-surface">Spending by Category</h3>
             {loading ? (
               <div className="h-64 flex items-center justify-center text-on-surface-variant">Loading...</div>
             ) : categoryData.length === 0 ? (
               <div className="h-64 flex items-center justify-center text-on-surface-variant">No expenses yet</div>
             ) : (
-              <div className="chart-container" style={{ minWidth: 0, width: '100%', height: '256px' }}>
-                <ResponsiveContainer width="100%" height={256}>
+              <div className="h-64 flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={categoryData}

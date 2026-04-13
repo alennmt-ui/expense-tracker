@@ -31,8 +31,6 @@ from income_models import Income
 from income_schemas import IncomeCreate, IncomeResponse, FinancialSummary
 from settings_models import Settings
 from settings_schemas import MonthlyLimitSet, MonthlyLimitResponse
-from app_settings_models import AppSettings
-from app_settings_schemas import SettingsUpdate, SettingsResponse
 from subscription_models import Subscription
 from subscription_schemas import SubscriptionCreate, SubscriptionUpdate, SubscriptionResponse
 from analytics_schemas import AnalyticsResponse, MonthlyTrend, AnalyticsMetrics
@@ -42,26 +40,6 @@ app = FastAPI(title="Receipt Processing API", version="1.0.0")
 
 # Create database tables on startup
 Base.metadata.create_all(bind=engine)
-
-# Seed default app settings
-def seed_default_settings(db: Session):
-    """Seed default app settings if they don't exist"""
-    defaults = {
-        "currency": "USD",
-        "reset_day": "1",
-        "passive_rule": "non_salary"
-    }
-    
-    for key, value in defaults.items():
-        existing = db.query(AppSettings).filter(AppSettings.key == key).first()
-        if not existing:
-            db.add(AppSettings(key=key, value=value))
-    
-    db.commit()
-
-# Seed settings on startup
-with next(get_db()) as db:
-    seed_default_settings(db)
 
 # Add CORS middleware to allow frontend requests
 app.add_middleware(
@@ -203,8 +181,6 @@ async def root():
             "get_limit": "/limit (GET) - Get monthly spending limit",
             "subscriptions": "/subscriptions (GET) - Get all subscriptions",
             "subscription": "/subscription (POST) - Create subscription",
-            "settings": "/settings (GET) - Get app settings",
-            "update_settings": "/settings (POST) - Update app settings",
             "analytics": "/analytics (GET) - Get analytics data",
             "insights": "/insights (GET) - Get financial insights"
         }
@@ -825,77 +801,6 @@ async def delete_subscription(subscription_id: int, db: Session = Depends(get_db
         raise HTTPException(
             status_code=500,
             detail=f"Failed to delete subscription: {str(e)}"
-        )
-
-
-# ==================== APP SETTINGS ENDPOINTS ====================
-
-@app.get("/settings", response_model=SettingsResponse)
-async def get_settings(db: Session = Depends(get_db)):
-    """
-    Get all app settings as key-value object
-    
-    Args:
-        db: Database session (injected)
-        
-    Returns:
-        SettingsResponse with all settings
-    """
-    try:
-        all_settings = db.query(AppSettings).all()
-        settings_dict = {setting.key: setting.value for setting in all_settings}
-        
-        # Return defaults if no settings exist
-        if not settings_dict:
-            settings_dict = {
-                "currency": "USD",
-                "reset_day": "1",
-                "passive_rule": "non_salary"
-            }
-        
-        return SettingsResponse(settings=settings_dict)
-    
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to fetch settings: {str(e)}"
-        )
-
-
-@app.post("/settings", response_model=SettingsResponse)
-async def update_settings(settings_data: SettingsUpdate, db: Session = Depends(get_db)):
-    """
-    Update multiple app settings
-    
-    Args:
-        settings_data: SettingsUpdate schema with settings dict
-        db: Database session (injected)
-        
-    Returns:
-        SettingsResponse with updated settings
-    """
-    try:
-        for key, value in settings_data.settings.items():
-            existing = db.query(AppSettings).filter(AppSettings.key == key).first()
-            
-            if existing:
-                existing.value = value
-            else:
-                db.add(AppSettings(key=key, value=value))
-        
-        db.commit()
-        
-        # Return all settings
-        all_settings = db.query(AppSettings).all()
-        settings_dict = {setting.key: setting.value for setting in all_settings}
-        
-        return SettingsResponse(settings=settings_dict)
-    
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to update settings: {str(e)}"
         )
 
 

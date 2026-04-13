@@ -5,9 +5,6 @@
 
 import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
-import MobileNav from './components/MobileNav';
-import MobileFAB from './components/MobileFAB';
-import MobileHeader from './components/MobileHeader';
 import RightPanel from './components/RightPanel';
 import Dashboard from './components/Dashboard';
 import Analytics from './pages/Analytics';
@@ -15,7 +12,6 @@ import Subscriptions from './pages/Subscriptions';
 import Insights from './pages/Insights';
 import Expenses from './pages/Expenses';
 import Income from './pages/Income';
-import Settings from './pages/Settings';
 import AddExpenseModal from './components/Modals/AddExpenseModal';
 import AddIncomeModal from './components/Modals/AddIncomeModal';
 import ScanReceiptModal from './components/Modals/ScanReceiptModal';
@@ -258,17 +254,10 @@ export default function App() {
     }
   };
 
-  const handleResetData = () => {
-    loadData();
-  };
-
   console.log('APP SUMMARY STATE:', summary);
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background">
-      {/* Mobile Header */}
-      <MobileHeader />
-      
       <Sidebar 
         activeScreen={activeScreen} 
         onScreenChange={setActiveScreen} 
@@ -286,7 +275,6 @@ export default function App() {
             topSuggestion={dashboardData.topSuggestion}
             onEditLimit={() => setIsSetLimitOpen(true)} 
             onNavigate={setActiveScreen}
-            onResetData={handleResetData}
           />
         )}
 
@@ -321,7 +309,16 @@ export default function App() {
           />
         )}
         
-        {activeScreen === 'settings' && <Settings />}
+        {['settings'].includes(activeScreen) && (
+          <main className="ml-64 mr-80 flex-1 h-screen bg-surface-container-low p-6 flex items-center justify-center">
+            <div className="text-center">
+              <h2 className="text-2xl font-headline font-bold text-on-surface">
+                {activeScreen.charAt(0).toUpperCase() + activeScreen.slice(1)}
+              </h2>
+              <p className="text-on-surface-variant mt-2">This module is currently under construction.</p>
+            </div>
+          </main>
+        )}
 
         <RightPanel 
           onAddExpense={() => {
@@ -361,18 +358,6 @@ export default function App() {
         onClose={() => setIsSetLimitOpen(false)}
         currentLimit={summary.spendingLimit}
         onUpdate={handleUpdateLimit}
-      />
-
-      {/* Mobile Navigation */}
-      <MobileNav activeScreen={activeScreen} onScreenChange={setActiveScreen} />
-      
-      {/* Mobile Floating Action Button */}
-      <MobileFAB 
-        onAddExpense={() => {
-          setPrefillData({});
-          setIsAddExpenseOpen(true);
-        }}
-        onAddIncome={() => setIsAddIncomeOpen(true)}
       />
     </div>
   );

@@ -8,4 +8,3 @@ export * from './adapters';
 export * from './subscriptions';
 export * from './analytics';
 export * from './insights';
-export * from './settings';

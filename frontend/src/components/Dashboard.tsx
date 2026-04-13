@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { TrendingUp, Landmark, ShoppingCart, Zap, Briefcase, Car, Utensils, Edit2, Lock } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { Transaction, Screen } from '../types';
 import { cn } from '../lib/utils';
 import { DashboardSummary } from '../constants';
@@ -9,8 +8,6 @@ import FixedCostsCard from './FixedCostsCard';
 import OptimizationSuggestion from './OptimizationSuggestion';
 import FinancialHealthScore from './FinancialHealthScore';
 import SubscriptionsList from './SubscriptionsList';
-import ChartModal from './Modals/ChartModal';
-import ResetDataButton from './ResetDataButton';
 
 interface DashboardProps {
   summary: DashboardSummary;
@@ -22,7 +19,6 @@ interface DashboardProps {
   topSuggestion: { title: string; description: string } | null;
   onEditLimit: () => void;
   onNavigate: (screen: Screen) => void;
-  onResetData: () => void;
 }
 
 export default function Dashboard({ 
@@ -34,28 +30,16 @@ export default function Dashboard({
   subscriptions,
   topSuggestion,
   onEditLimit, 
-  onNavigate,
-  onResetData
+  onNavigate 
 }: DashboardProps) {
-  const [isChartModalOpen, setIsChartModalOpen] = useState(false);
-  
   console.log('DASHBOARD RECEIVED:', summary);
   
   // Find top category for center display
   const topCategory = categoryData.length > 0 
     ? categoryData.reduce((max, cat) => cat.value > max.value ? cat : max, categoryData[0])
     : { name: 'No Data', value: 0 };
-
-  const handleResetComplete = () => {
-    onResetData();
-  };
   return (
-    <>
-    <main className="ml-64 mr-80 flex-1 h-screen bg-surface-container-low p-6 flex flex-col gap-4 overflow-hidden relative">
-      {/* Reset Button */}
-      <div className="absolute top-6 right-6 z-10">
-        <ResetDataButton onResetComplete={handleResetComplete} />
-      </div>
+    <main className="ml-64 mr-80 flex-1 h-screen bg-surface-container-low p-6 flex flex-col gap-4 overflow-hidden">
       {/* ROW 1: Balance & Summaries */}
       <div className="h-40 flex gap-4 shrink-0">
         <div className="flex-[2] bg-surface-container-lowest rounded-xl p-5 flex flex-col justify-between shadow-sm">
@@ -120,10 +104,10 @@ export default function Dashboard({
 
       {/* ROW 3: Category Chart & Recent Transactions */}
       <div className="h-[260px] flex gap-4 shrink-0 overflow-hidden">
-        <div className="w-64 bg-surface-container-lowest rounded-xl p-5 flex flex-col shadow-sm chart-card">
+        <div className="w-64 bg-surface-container-lowest rounded-xl p-5 flex flex-col shadow-sm">
           <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-4">Allocation by Category</span>
-          <div className="flex-1 relative chart-container" style={{ minWidth: 0, width: '100%', height: '180px' }}>
-            <ResponsiveContainer width="100%" height={180}>
+          <div className="flex-1 relative">
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={categoryData}
@@ -145,61 +129,7 @@ export default function Dashboard({
           </div>
         </div>
 
-        <div 
-          className="flex-1 bg-surface-container-lowest rounded-xl p-5 flex flex-col shadow-sm chart-card cursor-pointer hover:bg-surface-container-low transition-colors group"
-          onClick={() => setIsChartModalOpen(true)}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Income vs Expenses</span>
-            <span className="text-[8px] text-surface-tint font-bold opacity-0 group-hover:opacity-100 transition-opacity">CLICK TO EXPAND</span>
-          </div>
-          <div className="flex-1 chart-container" style={{ minWidth: 0, width: '100%', height: '180px' }}>
-            <ResponsiveContainer width="100%" height={180}>
-              <LineChart data={trendData.slice(-6).map((item, idx) => ({ 
-                name: `Week ${idx + 1}`, 
-                income: item.value * 1.2, 
-                expense: item.value 
-              }))}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis 
-                  dataKey="name" 
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fontSize: 10, fill: '#6b7280' }}
-                />
-                <YAxis hide />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: '#1f2937',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '12px'
-                  }}
-                  formatter={(value: number, name: string) => [
-                    `$${value.toLocaleString()}`,
-                    name === 'income' ? 'Income' : 'Expenses'
-                  ]}
-                />
-                <Line 
-                  type="monotone"
-                  dataKey="income"
-                  stroke="#3B82F6"
-                  strokeWidth={2}
-                  dot={false}
-                />
-                <Line 
-                  type="monotone"
-                  dataKey="expense"
-                  stroke="#F97316"
-                  strokeWidth={2}
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="w-80 bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col overflow-hidden">
+        <div className="flex-1 bg-surface-container-lowest rounded-xl p-4 shadow-sm flex flex-col overflow-hidden">
           <div className="flex justify-between items-center mb-3">
             <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Recent Intelligence</span>
             <button className="text-[10px] text-surface-tint font-bold hover:underline">VIEW ALL</button>
@@ -254,11 +184,5 @@ export default function Dashboard({
         </div>
       </div>
     </main>
-    
-    <ChartModal 
-      isOpen={isChartModalOpen}
-      onClose={() => setIsChartModalOpen(false)}
-    />
-    </>
   );
 }
