@@ -8,8 +8,18 @@ import pytesseract
 from PIL import Image
 import os
 
-# Configure Tesseract path (uncomment if Tesseract is not in PATH)
-pytesseract.pytesseract.tesseract_cmd = r'C:\\Users\\alenn\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe'
+# Configure Tesseract path - auto-detect or use system PATH
+import shutil
+
+# Try to find tesseract in system PATH first
+tesseract_path = shutil.which('tesseract')
+if tesseract_path:
+    pytesseract.pytesseract.tesseract_cmd = tesseract_path
+else:
+    # Fallback to Windows path for local development
+    windows_path = r'C:\\Users\\alenn\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe'
+    if os.path.exists(windows_path):
+        pytesseract.pytesseract.tesseract_cmd = windows_path
 
 
 
