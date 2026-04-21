@@ -15,11 +15,6 @@ import shutil
 tesseract_path = shutil.which('tesseract')
 if tesseract_path:
     pytesseract.pytesseract.tesseract_cmd = tesseract_path
-else:
-    # Fallback to Windows path for local development
-    windows_path = r'C:\\Users\\alenn\\AppData\\Local\\Programs\\Tesseract-OCR\\tesseract.exe'
-    if os.path.exists(windows_path):
-        pytesseract.pytesseract.tesseract_cmd = windows_path
 
 
 
@@ -138,13 +133,6 @@ def process_receipt(image_path, output_txt_path=None):
     
     # Save to file if output path is provided
     if output_txt_path:
-        save_text_to_file(extracted_text, output_txt_path)
-    else:
-        # Auto-generate output filename in output folder
-        base_name = os.path.basename(os.path.splitext(image_path)[0])
-        output_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'output')
-        os.makedirs(output_dir, exist_ok=True)
-        output_txt_path = os.path.join(output_dir, f"{base_name}_extracted.txt")
         save_text_to_file(extracted_text, output_txt_path)
     
     return extracted_text
