@@ -106,6 +106,11 @@ async def upload_receipt(file: UploadFile = File(...)):
         # Step 1: OCR - Extract text from image
         try:
             ocr_text = process_receipt(temp_file_path, output_txt_path=None)
+        except EnvironmentError as e:
+            raise HTTPException(
+                status_code=503,
+                detail=f"OCR service unavailable: {str(e)}"
+            )
         except Exception as e:
             raise HTTPException(
                 status_code=500,

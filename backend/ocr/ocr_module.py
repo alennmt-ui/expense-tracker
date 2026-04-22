@@ -15,6 +15,25 @@ import shutil
 tesseract_path = shutil.which('tesseract')
 if tesseract_path:
     pytesseract.pytesseract.tesseract_cmd = tesseract_path
+    print(f"Tesseract found at: {tesseract_path}")
+else:
+    # Try common Linux paths
+    linux_paths = ['/usr/bin/tesseract', '/usr/local/bin/tesseract']
+    for path in linux_paths:
+        if os.path.exists(path):
+            pytesseract.pytesseract.tesseract_cmd = path
+            print(f"Tesseract found at: {path}")
+            break
+    else:
+        # Final check - try to get version to confirm installation
+        try:
+            pytesseract.get_tesseract_version()
+            print("Tesseract found in system PATH")
+        except pytesseract.TesseractNotFoundError:
+            raise EnvironmentError(
+                "Tesseract OCR is not installed. Please install tesseract-ocr package. "
+                "On Ubuntu/Debian: apt-get install tesseract-ocr tesseract-ocr-eng"
+            )
 
 
 
